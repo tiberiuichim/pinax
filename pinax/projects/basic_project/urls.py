@@ -3,15 +3,25 @@ from django.conf import settings
 
 from django.views.generic.simple import direct_to_template
 
-from account.openid_consumer import PinaxConsumer
-
 from django.contrib import admin
 admin.autodiscover()
 
-import os
+from account.openid_consumer import PinaxConsumer
+
+
+if settings.ACCOUNT_OPEN_SIGNUP:
+    signup_view = "account.views.signup"
+else:
+    signup_view = "signup_codes.views.signup"
+
 
 urlpatterns = patterns('',
-    url(r'^$', direct_to_template, {"template": "homepage.html"}, name="home"),
+    url(r'^$', direct_to_template, {
+        "template": "homepage.html",
+    }, name="home"),
+    
+    url(r'^admin/invite_user/$', 'signup_codes.views.admin_invite_user', name="admin_invite_user"),
+    url(r'^account/signup/$', signup_view, name="acct_signup"),
     
     (r'^about/', include('about.urls')),
     (r'^account/', include('account.urls')),
@@ -24,6 +34,6 @@ urlpatterns = patterns('',
 )
 
 if settings.SERVE_MEDIA:
-    urlpatterns += patterns('', 
-        (r'^site_media/(?P<path>.*)$', 'misc.views.serve')
+    urlpatterns += patterns('',
+        (r'^site_media/', include('staticfiles.urls')),
     )

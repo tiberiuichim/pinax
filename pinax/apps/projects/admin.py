@@ -1,13 +1,7 @@
 from django.contrib import admin
-from projects.models import Project, Topic, Task
+from projects.models import Project
 
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ('name', 'creator', 'created', 'private', 'deleted')
-
-class TopicAdmin(admin.ModelAdmin):
-    list_display = ('title', )
+    list_display = ('name', 'slug', 'creator', 'created')
 
 admin.site.register(Project, ProjectAdmin)
-admin.site.register(Topic, TopicAdmin)
-admin.site.register(Task)
-

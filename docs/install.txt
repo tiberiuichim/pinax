@@ -1,174 +1,112 @@
 Installation
 ============
 
-The sample projects in Pinax depend on a lot of external apps and libraries. 
-Since we `moved to distutils/setuptools`_ we are able to manage those 
-dependecies by using useful tools `virtualenv`_, `pip`_ and `buildout`_.
+This covers installation from a release bundle. For information on installing
+a development version, see http://pinaxproject.com/docs/dev/contributing.html.
 
-One exciting feature of pip for example is the ability to install Python 
-packages like the external apps directly from various version control systems.
-The development version of Pinax relies on some apps that are hosted that way.
-So please make sure you have the latest versions installed of: Subversion_,
-Git_, Mercurial_ and Bazaar_. If you prefer to use buildout you can use the
-provided buildout.cfg, which uses `gp.recipe.pip`_ internally.
+The release bundle has almost everything you need to get Pinax up and running.
+The only things not included are `Python`_ itself, the `Python Imaging Library`_
+(PIL) and a database such as SQLite (which is included in Python 2.5+).
 
-To make it easier to start with developing your own Pinax based project we 
-provide a `virtualenv bootstrap script`_. It creates a virtualenv with the 
-necessary Pinax Git clone and installs pip_ and Django_ inside the
-environment. This allows you to keep your whole project inside one directory
-and doesn't spoil the global site-packages directory with all the dependencies.
-
-First download the virtualenv bootstrap script (Linux)::
-
-    curl -o pinax-boot.py http://github.com/pinax/pinax/raw/master/scripts/pinax-boot.py
-
-or open ``http://github.com/pinax/pinax/raw/master/scripts/pinax-boot.py`` in
-your browser and save it on your hard disk.
-
-Then run the script, e.g. to create a environment called ``pinax-env``::
-
-    python pinax-boot.py pinax-env
-
-After that you need to `activate the new environment`_ so your shell session
-knows which Python interpreter and site-packages directory to use. If you use
-bash you can simply run this in the environment root directory::
-
-    source bin/activate
-
-You are now able to install the required external apps and libraries by either
-using pip or buildout, whatever you prefer.
-
-The one exception is the `Python Imaging Library`_ (PIL)
-which you will have to provide yourself if you want photo support.
+For more information on installing PIL, see :ref:`ref-pil`.
 
 .. note::
-    
-    Some of the external apps are still link hosted with Google Code. It is
-    common to see::
-    
-        Fetching external item into 'apps/external_apps/django_extensions'
-        svn: PROPFIND request failed on '/svn/trunk/django_extensions'
-        svn: PROPFIND of '/svn/trunk/django_extensions': 502 Bad Gateway (http://django-command-extensions.googlecode.com)
-    
-    You should be able to ignore it and try the installation, checkout or
-    update again.
 
-Using ``pip``
--------------
+    If you are on Mac OS X, make sure you have the Apple developer tools
+    installed before proceeding with Pinax installation.
 
-``pip`` allows you to install the required Python packages by passing a simple
-text file containing a list of requirement strings, e.g. django-wikiapp==0.1.2.
-Please don't hesitate to read about the requirement files in
-`pip's documentation`_. We currently provide two requirement files:
 
-* ``requirements/libs.txt`` - Libraries and non-Django packages
-* ``requirements/external_apps.txt`` - External reusable Django apps
+Installing Pinax
+----------------
 
-Note that the latter automatically includes the libraries. You should think of
-it as a starting point for your own requirement files. For example here's
-how you start the installation of every requirement::
+Pinax makes use of Python virtual environments (or virtualenvs) to isolate
+the various packages it uses from the rest of your system. Pinax comes with a
+script that will create the virtualenv for you and install Django and the
+various applications and libraries that make up Pinax.
 
-    pip install --requirement src/pinax/requirements/external_apps.txt
+To run this script, extract the release bundle, cd into it and run::
 
-We will however provide `requirements files`_ for each sample project soon so
-you don't have to install the apps and libraries used in all Pinax sample
-projects.
+    $ python scripts/pinax-boot.py <path-to-virtual-env-to-create>
 
-In case you want to update the development version of Pinax you have to update
-both Pinax and the apps separately. The Pinax code is updated by running in
-the ``src/pinax`` directory::
+This will set up the virtualenv and install everything.
 
-    git pull
+For example, if you wanted to create your environment in a directory parallel
+to where you extracted the bundle you could run::
 
-To update the apps and libraries run again inside the environment root
-directory::
+    $ python scripts/pinax-boot.py ../pinax-env
 
-    pip install --requirement src/pinax/requirements/external_apps.txt
+If you use virtualenvwrapper_ (which we recommend), this would become::
 
-Note that if you want to use another external app or external library,
-you don't need to use the `requirement file we provide`_. Don't hesitate to
-write your own or install it directly with pip inside your environment.
+    $ python scripts/pinax-boot.py $WORKON_HOME/pinax-env
 
-Using ``buildout``
-------------------
 
-``buildout`` enables you to go a bit further in the way you handle
-requirements by abstracting the different deployment scenarios with
-so-called `recipes`_. Pinax for example uses a `pip recipe`_ to make sure
-every requirement is installed properly. But you can easily integrate it with
-your current buildouts.
+Activating the virtualenv
+-------------------------
 
-To get started with buildout you first need to install buildout in the
-virtualenv we created with the virtualenv bootstrap script::
+Any time you work on a project involving Pinax, you will want to activate
+the virtualenv.
 
-    pip install zc.buildout
+This is done with::
 
-After that you'll have a new executable inside your ``bin`` (Linux) or
-``Script`` directory (Windows) which you'll use with a buildout config file
-we provide.
+    $ source <path-to-virtual-env-created>/bin/activate
 
-This file needs to be downloaded from the Pinax repository and saved in the
-virtualenv root directory. So please make sure you are in the directory that
-contains the following directories (among others): ``bin``, ``build`` and
-``src`` and run (on Linux)::
+or, in our example above using ``../pinax-env``::
 
-    curl -o buildout.cfg http://github.com/pinax/pinax/raw/master/buildout.cfg
+    $ source ../pinax-env/bin/activate
 
-or open ``http://github.com/pinax/pinax/raw/master/buildout.cfg`` in
-your browser and save it on your hard disk in the virtualenv root directory.
+On Windows you would run::
 
-Then all you need to do is to run the buildout command inside the virtualenv
-root directory. You can update the buildout and the packages it contains
-by running buildout again.
+    $ ..\pinax-env\Scripts\activate.bat
+
+With virtualenvwrapper, this becomes::
+
+    $ workon pinax-env
+
+which you can run from anywhere on your filesystem.
+
+Note that you will develop your Pinax-based project in a directory outside
+your virtualenv. As long as the virtualenv is active, your project will have
+access to all of the apps and libraries Pinax provides.
+
+
+Starting a new Pinax project
+----------------------------
+
+The recommended way to start a new Pinax-based project is to clone one of the
+existing projects. This is done via the ``pinax-admin clone_project``
+command which you can run once you are in your Pinax virtual-env.
+
+You can get a list of available projects with::
+
+    (pinax-env)$ pinax-admin clone_project -l
+
+This will show you a list of projects that you can base your new project on.
+
+Just as quick demonstration, let's start with the social_project. cd into the
+directory you'd like to create your new project in and run::
+
+    (pinax-env)$ pinax-admin clone_project social_project mysite
+
+This will create a new Pinax project called 'mysite' in your current working
+directory. Lastly, let's get it running::
+
+    (pinax-env)$ cd mysite/
+    (pinax-env)$ python manage.py syncdb
+    (pinax-env)$ python manage.py runserver
+
+Point your browser at http://localhost:8000/ and you should see the Pinax
+default homepage!
+
+Note that mail and some notifications are queued rather than delivered
+immediately. See :ref:`ref-sending-mail-and-notices` for details.
 
 What's next?
 ------------
 
-Once the installation is complete, you should be able to cd into
-``src/pinax/projects/complete_project/`` or
-``src/pinax/projects/basic_project/`` and run 
-``./manage.py syncdb`` and ``./manage.py runserver`` to get running
-immediately.
+Look at our :doc:`customization <customization>` documentation to learn how you
+might customize your cloned project. If you are ready to deploy your project
+check out the :doc:`deployment <deployment>` documentation.
 
-These are just sample projects, however. You will likely want to create your
-own project and :ref:`customize <ref-customization>` it.
-
-.. _`moved to distutils/setuptools`: http://code.google.com/p/django-hotclub/wiki/MovingToDistutils
-.. _virtualenv: http://pypi.python.org/pypi/virtualenv
-.. _pip: http://pypi.python.org/pypi/pip
-.. _activate the new environment: http://pypi.python.org/pypi/virtualenv#activate-script
-.. _virtualenv bootstrap script: http://pypi.python.org/pypi/virtualenv#creating-your-own-bootstrap-scripts
-.. _Subversion: http://subversion.tigris.org/
-.. _Git: http://git-scm.com/
-.. _Mercurial: http://www.selenic.com/mercurial/
-.. _Bazaar: http://bazaar-vcs.org/
-.. _requirements files: http://pip.openplans.org/requirement-format.html
-.. _requirement file we provide: http://github.com/pinax/pinax/raw/master/requirements/external_apps.txt
-.. _Django: http://www.djangoproject.com/
-.. _buildout: http://pypi.python.org/pypi/zc.buildout
-.. _gp.recipe.pip: http://pypi.python.org/pypi/gp.recipe.pip
-.. _`pip's documentation`: http://pip.openplans.org/
-.. _recipes: http://pypi.python.org/pypi/zc.buildout#id1
-.. _`pip recipe`: http://pypi.python.org/pypi/gp.recipe.pip
-
-Directory Structure
--------------------
-
-=======================   ====================================================
-Directory                 Content
-=======================   ====================================================
-``apps/``                 contains re-usable apps that aren't yet externalized
-``docs/``                 documentation (using rst and sphinx; in progress)
-``fixtures/``             test fixtures (in progress)
-``libs/``                 contains local libraries
-``media/``                common media files
-``projects/``             contains a sample projects
-``requirements/``         pip requirement files (in progress)
-``templates/``            common templates
-=======================   ====================================================
-
-There is some path manipulation in manage.py to get this all to work. You'll
-need to do something similar in your wsgi or mod_python configuration. See
-:ref:`ref-deployment` for more details.
-
+.. _Python: http://python.org
 .. _`Python Imaging Library`: http://www.pythonware.com/products/pil/
+.. _`virtualenvwrapper`: http://www.doughellmann.com/projects/virtualenvwrapper/

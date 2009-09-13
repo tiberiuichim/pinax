@@ -5,14 +5,14 @@ from django.core.urlresolvers import reverse
 
 from django.views.generic.simple import direct_to_template
 
-from account.openid_consumer import PinaxConsumer
-from waitinglist.forms import WaitingListEntryForm
-
 from django.contrib import admin
 admin.autodiscover()
 
-import os
+from account.openid_consumer import PinaxConsumer
+from waitinglist.forms import WaitingListEntryForm
 
+
+# @@@ turn into template tag
 def homepage(request):
     if request.method == "POST":
         form = WaitingListEntryForm(request.POST)
@@ -25,15 +25,18 @@ def homepage(request):
         "form": form,
     })
 
+
 if settings.ACCOUNT_OPEN_SIGNUP:
-    signup_view = "basic_signup.views.signup"
+    signup_view = "account.views.signup"
 else:
     signup_view = "signup_codes.views.signup"
+
 
 urlpatterns = patterns('',
     url(r'^$', homepage, name="home"),
     url(r'^success/$', direct_to_template, {"template": "waitinglist/success.html"}, name="waitinglist_sucess"),
     
+    url(r'^admin/invite_user/$', 'signup_codes.views.admin_invite_user', name="admin_invite_user"),
     url(r'^account/signup/$', signup_view, name="acct_signup"),
     
     (r'^about/', include('about.urls')),
@@ -47,6 +50,6 @@ urlpatterns = patterns('',
 )
 
 if settings.SERVE_MEDIA:
-    urlpatterns += patterns('', 
-        (r'^site_media/(?P<path>.*)$', 'misc.views.serve')
+    urlpatterns += patterns('',
+        (r'^site_media/', include('staticfiles.urls')),
     )

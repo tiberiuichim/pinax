@@ -7,6 +7,7 @@
 {% load extra_voting_tags %}
 {% load in_filter %}
 {% load extra_tagging_tags %}
+{% load sorting_tags %}
 
 {% block head_title %}{% blocktrans %}All Bookmarks{% endblocktrans %}{% endblock %}
 
@@ -18,28 +19,30 @@
     <h1>{% trans "All Bookmarks" %}</h1>
     
     {% if bookmarks %}
+        {# ## FIXME this should probably be done in djanog-sorting #}
+        {% with request.field|cut:"-" as sort_order %}
         <p>{% trans "These are bookmarks from everyone:" %}</p>
-        
+
         <p>{% trans "Sort by:" %}
-            {% ifequal request.sort_order "points" %}
-                <a href="?sort_order=hotness">{% trans "reddit-like hotness" %}</a>
+            {% ifequal sort_order "points" %}
+                {% anchor "hotness" "reddit-like hotness" %}
                 {% trans "or" %}
                 <b>{% trans "total points" %}</b>
                 {% trans "or" %}
-                <a href="?sort_order=date">{% trans "date added" %}</a>
-                {% order_by_votes bookmarks %}
+                {% anchor "date" "date added" %}
+                {% order_by_votes bookmarks request.direction %}
             {% else %}
-                {% ifequal request.sort_order "hotness" %}
+                {% ifequal sort_order "hotness" %}
                     <b>{% trans "reddit-like hotness" %}</b>
                     {% trans "or" %}
-                    <a href="?sort_order=points">{% trans "total points" %}</a>
+                    {% anchor "points" "total points" %}
                     {% trans "or" %}
-                    <a href="?sort_order=date">{% trans "date added" %}</a>
-                    {% order_by_reddit bookmarks added %}
+                    {% anchor "date" "date added" %}
+                    {% order_by_reddit bookmarks added request.direction %}
                 {% else %}
-                    <a href="?sort_order=hotness">{% trans "reddit-like hotness" %}</a>
+                    {% anchor "hotness" "reddit-like hotness" %}
                     {% trans "or" %}
-                    <a href="?sort_order=points">{% trans "total points" %}</a>
+                    {% anchor "points" "total points" %}
                     {% trans "or" %}
                     <b>{% trans "date added" %}</b>
                 {% endifequal %}
@@ -63,13 +66,13 @@
                         {% dict_entry_for_item bookmark from vote_dict as vote %}
                         {% dict_entry_for_item bookmark from score_dict as score %}
                         {% if user.is_authenticated %}
-                            <a id="up_{{ bookmark.id }}" href="#" onclick="vote({{ bookmark.id }}, '{% if vote and vote.is_downvote %}clear{% else %}up{% endif %}'); return false;"><img src="{{ MEDIA_URL }}bookmarks/img/up_{% if vote and vote.is_upvote %}mod{% else %}grey{% endif %}.png"/></a><br />
+                            <a id="up_{{ bookmark.id }}" href="#" onclick="vote({{ bookmark.id }}, '{% if vote and vote.is_downvote %}clear{% else %}up{% endif %}'); return false;"><img src="{{ STATIC_URL }}bookmarks/img/up_{% if vote and vote.is_upvote %}mod{% else %}grey{% endif %}.png"/></a><br />
                         {% endif %}
                         <span id="bookmark_{{ bookmark.id }}_score">
                             {{ score.score|default:0 }} point{{ score.score|default:0|pluralize }}
                         </span><br />
                         {% if user.is_authenticated %}
-                            <a id="down_{{ bookmark.id }}" href="#" onclick="vote({{ bookmark.id }}, '{% if vote and vote.is_upvote %}clear{% else %}down{% endif %}'); return false;"><img id="img_{{ bookmark.id }}_down" src="{{ MEDIA_URL }}bookmarks/img/down_{% if vote and vote.is_downvote %}mod{% else %}grey{% endif %}.png"/></a>
+                            <a id="down_{{ bookmark.id }}" href="#" onclick="vote({{ bookmark.id }}, '{% if vote and vote.is_upvote %}clear{% else %}down{% endif %}'); return false;"><img id="img_{{ bookmark.id }}_down" src="{{ STATIC_URL }}bookmarks/img/down_{% if vote and vote.is_downvote %}mod{% else %}grey{% endif %}.png"/></a>
                         {% endif %}
                     </td>
                     <td>
@@ -96,6 +99,7 @@
         
         {% paginate %}
         
+    {% endwith %}
     {% else %}
         <p>{% trans "No bookmarks yet." %}</p>
     {% endif %}
@@ -111,16 +115,16 @@
                 $('#bookmark_' + bookmark_id + '_score').text(new_score + ' point' + (new_score == 1 ? '': 's'));
             });
             if (direction == 'up') {
-                $('#up_' + bookmark_id).replaceWith('<a id="up_' + bookmark_id + '" href="#" onclick="return false;"><img src="{{ MEDIA_URL }}bookmarks/img/up_mod.png"/>');
-                $('#down_' + bookmark_id).replaceWith('<a id="down_' + bookmark_id + '" href="#" onclick="vote(' + bookmark_id + ', \'clear\'); return false;"><img src="{{ MEDIA_URL }}bookmarks/img/down_grey.png"/>');
+                $('#up_' + bookmark_id).replaceWith('<a id="up_' + bookmark_id + '" href="#" onclick="return false;"><img src="{{ STATIC_URL }}bookmarks/img/up_mod.png"/>');
+                $('#down_' + bookmark_id).replaceWith('<a id="down_' + bookmark_id + '" href="#" onclick="vote(' + bookmark_id + ', \'clear\'); return false;"><img src="{{ STATIC_URL }}bookmarks/img/down_grey.png"/>');
             }
             else if (direction == 'down') {
-                $('#up_' + bookmark_id).replaceWith('<a id="up_' + bookmark_id + '" href="#" onclick="vote(' + bookmark_id + ', \'clear\'); return false;"><img src="{{ MEDIA_URL }}bookmarks/img/up_grey.png"/>');
-                $('#down_' + bookmark_id).replaceWith('<a id="down_' + bookmark_id + '" href="#" onclick="return false;"><img src="{{ MEDIA_URL }}bookmarks/img/down_mod.png"/>');
+                $('#up_' + bookmark_id).replaceWith('<a id="up_' + bookmark_id + '" href="#" onclick="vote(' + bookmark_id + ', \'clear\'); return false;"><img src="{{ STATIC_URL }}bookmarks/img/up_grey.png"/>');
+                $('#down_' + bookmark_id).replaceWith('<a id="down_' + bookmark_id + '" href="#" onclick="return false;"><img src="{{ STATIC_URL }}bookmarks/img/down_mod.png"/>');
             }
             else { // clear
-                $('#up_' + bookmark_id).replaceWith('<a id="up_' + bookmark_id + '" href="#" onclick="vote(' + bookmark_id + ', \'up\'); return false;"><img src="{{ MEDIA_URL }}bookmarks/img/up_grey.png"/>');
-                $('#down_' + bookmark_id).replaceWith('<a id="down_' + bookmark_id + '" href="#" onclick="vote(' + bookmark_id + ', \'down\'); return false;"><img src="{{ MEDIA_URL }}bookmarks/img/down_grey.png"/>');
+                $('#up_' + bookmark_id).replaceWith('<a id="up_' + bookmark_id + '" href="#" onclick="vote(' + bookmark_id + ', \'up\'); return false;"><img src="{{ STATIC_URL }}bookmarks/img/up_grey.png"/>');
+                $('#down_' + bookmark_id).replaceWith('<a id="down_' + bookmark_id + '" href="#" onclick="vote(' + bookmark_id + ', \'down\'); return false;"><img src="{{ STATIC_URL }}bookmarks/img/down_grey.png"/>');
             }
         }
     </script>

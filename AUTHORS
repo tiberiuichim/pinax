@@ -1,11 +1,13 @@
 Pinax was started by James Tauber in May 2008.
 
-The PRIMARY AUTHORS are:
+The PRIMARY AUTHORS are (and/or have been):
 
     * James Tauber
-    * Greg Newman
     * Brian Rosner
     * Jannis Leidel
+    * Danny Greenfeld
+    * Martin Mahner
+    * Greg Newman
     * Eric Florenzano
 
 
@@ -26,8 +28,30 @@ ADDITIONAL CONTRIBUTORS include:
     * Nicola Larosa
     * Rajeev Sebastian
     * Rock Howard
-    * Danny Greenfeld
+    * Michael Schneider
+    * Stephan Jäkel
+    * Horst Gutmann
+    * Ahmad Al-Ibrahim
+    * Jesper Nøhr
+    * Jonas Nockert
+    * Sebastian Hillig
+    * Markus Zapke-Gründemann
+    * Curt Micol
+    * Luke Hatcher
+    * Mikkel Høgh
+    * Skylar Saveland
+    * Manuel Meyer
+    * Chris Shenton
+    * Nicholas Tollervey
+    * Klynton Jessup
+    * Chris Adams
+    * Anders Pearson
+    * Fernando Correia
+    * Fidel Ramos Sañudo
+    * Kenneth Belitzky
 
+Pinax includes the following:
 
-Pinax includes the Silk icon set 1.3 by Mark James
-http://www.famfamfam.com/lab/icons/silk/
+    * Silk icon set 1.3 by Mark James http://www.famfamfam.com/lab/icons/silk/
+    * The uni-form css/js forms library by Dragan Babić http://sprawsm.com/uni-form/
+

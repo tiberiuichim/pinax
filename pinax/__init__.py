@@ -1,9 +1,11 @@
-VERSION = (0, 7, 0, "alpha", 1)
+VERSION = (0, 9, 0, "alpha", 1)
 
 def get_version():
+    version = '%s.%s' % (VERSION[0], VERSION[1])
+    if VERSION[2]:
+        version = '%s.%s' % (version, VERSION[2])
     if VERSION[3] != "final":
-        return "%s.%s.%s%s%s" % (VERSION[0], VERSION[1], VERSION[2], VERSION[3], VERSION[4])
-    else:
-        return "%s.%s.%s" % (VERSION[0], VERSION[1], VERSION[2])
+        version = '%s%s%s' % (version, VERSION[3], VERSION[4])
+    return version
 
 __version__ = get_version()

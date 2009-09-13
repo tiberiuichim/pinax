@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-# Django settings for basic pinax project.
+# Django settings for intranet project.
 
 import os.path
+import posixpath
 import pinax
 
 PINAX_ROOT = os.path.abspath(os.path.dirname(pinax.__file__))
@@ -15,6 +16,10 @@ TEMPLATE_DEBUG = DEBUG
 
 # tells Pinax to serve media through django.views.static.serve.
 SERVE_MEDIA = DEBUG
+
+INTERNAL_IPS = (
+    '127.0.0.1',
+)
 
 ADMINS = (
     # ('Your Name', 'your_email@domain.com'),
@@ -49,20 +54,33 @@ USE_I18N = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
-
-MEDIA_ROOT = os.path.join(os.path.dirname(__file__), "site_media")
+MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'site_media', 'media')
 
 # URL that handles the media served from MEDIA_ROOT.
 # Example: "http://media.lawrence.com"
-MEDIA_URL = '/site_media/'
+MEDIA_URL = '/site_media/media/'
+
+# Absolute path to the directory that holds static files like app media.
+# Example: "/home/media/media.lawrence.com/apps/"
+STATIC_ROOT = os.path.join(PROJECT_ROOT, 'site_media', 'static')
+
+# URL that handles the static files like app media.
+# Example: "http://media.lawrence.com"
+STATIC_URL = '/site_media/static/'
+
+# Additional directories which hold static files
+STATICFILES_DIRS = (
+    ('intranet_project', os.path.join(PROJECT_ROOT, 'media')),
+    ('pinax', os.path.join(PINAX_ROOT, 'media', PINAX_THEME)),
+)
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/media/'
+ADMIN_MEDIA_PREFIX = posixpath.join(STATIC_URL, "admin/")
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'bk-e2zv3humar79nm=j*bwc=-ymeit(8a20whp3goq4dh71t)s'
+SECRET_KEY = ''
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
@@ -75,16 +93,18 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django_openid.consumer.SessionConsumer',
-    'intranet_account.middleware.LocaleMiddleware',
-    'intranet_account.middleware.AuthenticatedMiddleware',
+    'account.middleware.LocaleMiddleware',
+    'account.middleware.AuthenticatedMiddleware',
     'django.middleware.doc.XViewMiddleware',
     'pagination.middleware.PaginationMiddleware',
+    'pinax.middleware.security.HideSensistiveFieldsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 )
 
 ROOT_URLCONF = 'intranet_project.urls'
 
 TEMPLATE_DIRS = (
-    os.path.join(os.path.dirname(__file__), "templates"),
+    os.path.join(PROJECT_ROOT, "templates"),
     os.path.join(PINAX_ROOT, "templates", PINAX_THEME),
 )
 
@@ -95,12 +115,12 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.core.context_processors.media",
     "django.core.context_processors.request",
     
+    "pinax.core.context_processors.pinax_settings",
+    
     "notification.context_processors.notification",
     "announcements.context_processors.site_wide_announcements",
-    "intranet_account.context_processors.openid",
-    "intranet_account.context_processors.account",
-    "misc.context_processors.contact_email",
-    "misc.context_processors.site_name",
+    "account.context_processors.openid",
+    "account.context_processors.account",
 )
 
 INSTALLED_APPS = (
@@ -111,6 +131,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.humanize',
     'django.contrib.markup',
+    'pinax.templatetags',
     
     # external
     'notification', # must be first
@@ -127,15 +148,21 @@ INSTALLED_APPS = (
     'threadedcomments',
     'wiki',
     'uni_form',
+    'django_markup',
+    'attachments',
+    'django_filters',
+    'staticfiles',
+    'debug_toolbar',
     
     # internal (for now)
     'basic_profiles',
-    'intranet_account',
-    'misc',
-    #'pastebin',
-    #'quickbar',
+    'account',
+    'signup_codes',
+    'groups',
+    'topics',
+    'tagging_utils',
+    'threadedcomments_extras',
     'tasks',
-    #'documents',
     
     'tag_app',
     
@@ -144,11 +171,20 @@ INSTALLED_APPS = (
 )
 
 ABSOLUTE_URL_OVERRIDES = {
-    "auth.user": lambda o: "/profiles/%s/" % o.username,
+    "auth.user": lambda o: "/profiles/profile/%s/" % o.username,
 }
 
+MARKUP_FILTER_FALLBACK = 'none'
+MARKUP_CHOICES = (
+    ('restructuredtext', u'reStructuredText'),
+    ('textile', u'Textile'),
+    ('markdown', u'Markdown'),
+    ('creole', u'Creole'),
+)
+WIKI_MARKUP_CHOICES = MARKUP_CHOICES
+
 AUTH_PROFILE_MODULE = 'basic_profiles.Profile'
-NOTIFICATION_LANGUAGE_MODULE = 'intranet_account.Account'
+NOTIFICATION_LANGUAGE_MODULE = 'account.Account'
 
 EMAIL_CONFIRMATION_DAYS = 2
 EMAIL_DEBUG = DEBUG
@@ -156,6 +192,17 @@ CONTACT_EMAIL = "feedback@example.com"
 SITE_NAME = "Pinax"
 LOGIN_URL = "/account/login/"
 LOGIN_REDIRECT_URLNAME = "home"
+
+ACCOUNT_OPEN_SIGNUP = False
+ACCOUNT_REQUIRED_EMAIL = False
+ACCOUNT_EMAIL_VERIFICATION = False
+
+AUTHENTICATED_EXEMPT_URLS = [
+    r"^/account/signup/$",
+    r"^/account/password_reset",
+    r"^/account/confirm_email",
+    r"^/openid",
+]
 
 # local_settings.py can be used to override environment-specific settings
 # like database and email that differ between development and production.
