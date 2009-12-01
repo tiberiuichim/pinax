@@ -25,7 +25,7 @@ class SignupForm(BaseSignupForm):
         if signup_code:
             return signup_code
         else:
-            raise forms.ValidationError("Signup code was not valid.")
+            raise forms.ValidationError(_("Signup code was not valid."))
 
 
 class InviteUserForm(GroupForm):
