@@ -6,6 +6,9 @@ from django.db import models
 from groups.base import Group
 
 class Tribe(Group):
+
+    class Meta:
+        verbose_name = _("Tribe")
     
     members = models.ManyToManyField(User, related_name='tribes', verbose_name=_('members'))
     
